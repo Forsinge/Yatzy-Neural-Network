@@ -1,6 +1,8 @@
 package nn
 
 import (
+	"fmt"
+
 	mat "github.com/Forsinge/Yatzy-Neural-Network/matrix"
 )
 
@@ -14,13 +16,18 @@ type Layer struct {
 	derivative func(x float64) float64
 }
 
-func New(inputSize, outputSize int, activation func(x float64) float64, derivative func(x float64) float64) *Layer {
+func NewLayer(inputSize, outputSize int, activation func(x float64) float64, derivative func(x float64) float64) *Layer {
 	return &Layer{
 		weights:    mat.NewRand(outputSize, inputSize),
 		biases:     mat.NewRand(outputSize, 1),
 		activation: activation,
 		derivative: derivative,
 	}
+}
+
+func (l *Layer) Print() {
+	outputSize, inputSize := l.weights.Dims()
+	fmt.Println("[", inputSize, "to", outputSize, "]")
 }
 
 func (l *Layer) Feed(input *mat.Matrix) {

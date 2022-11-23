@@ -1,6 +1,7 @@
 package yatzy
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -39,6 +40,22 @@ func NewSheet() Sheet {
 	return sheet
 }
 
+func (sheet *Sheet) Print() {
+	fmt.Println("Current sheet:")
+	for i := range sheet.Categories {
+		category := sheet.Categories[i]
+		if category.Used && category.Points == 0 {
+			fmt.Print("[-] ")
+		} else if category.Points == 0 {
+			fmt.Print("[ ] ")
+		} else {
+			fmt.Print("[", category.Points, "] ")
+		}
+		fmt.Println(category.Name)
+	}
+	fmt.Println()
+}
+
 func isValid(category Category, dice Dice, index int) bool {
 	isValid := !category.Used
 	switch index {
@@ -67,7 +84,7 @@ func isValid(category Category, dice Dice, index int) bool {
 	return isValid
 }
 
-func ValidCategories(sheet Sheet, dice Dice) []int {
+func validCategories(sheet Sheet, dice Dice) []int {
 	valid := []int{}
 	for i := range sheet.Categories {
 		if isValid(sheet.Categories[i], dice, i) {
@@ -77,7 +94,7 @@ func ValidCategories(sheet Sheet, dice Dice) []int {
 	return valid
 }
 
-func ActiveCategories(sheet Sheet) []int {
+func activeCategories(sheet Sheet) []int {
 	active := []int{}
 	for i := range sheet.Categories {
 		if !sheet.Categories[i].Used {
@@ -126,7 +143,7 @@ func categoryPoints(dice Dice, index int) int {
 
 func ConsumeCategory(sheet Sheet, dice Dice, index int) Sheet {
 	if sheet.Categories[index].Used == true {
-		options := ActiveCategories(sheet)
+		options := activeCategories(sheet)
 		i := rand.Intn(len(options))
 		index = options[i]
 	}

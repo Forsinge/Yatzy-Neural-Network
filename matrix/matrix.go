@@ -3,7 +3,6 @@ package matrix
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
 type Matrix struct {
@@ -43,7 +42,6 @@ func NewFrom(rows, cols int, data []float64) *Matrix {
 }
 
 func NewRand(rows, cols int) *Matrix {
-	rand.Seed(time.Now().UnixNano())
 	data := make([]float64, rows*cols)
 	for i := range data {
 		data[i] = rand.Float64() - 0.5
@@ -74,6 +72,18 @@ func (m *Matrix) Set(row, col int, val float64) {
 	m.data[m.indexer(m, row, col)] = val
 }
 
+func (m *Matrix) Dims() (int, int) {
+	return m.rows, m.cols
+}
+
+func (m *Matrix) MaxDim() int {
+	if m.rows > m.cols {
+		return m.rows
+	} else {
+		return m.cols
+	}
+}
+
 func (m *Matrix) Print() {
 	for row := 0; row < m.rows; row += 1 {
 		for col := 0; col < m.cols; col += 1 {
@@ -82,6 +92,10 @@ func (m *Matrix) Print() {
 		fmt.Println()
 	}
 	fmt.Println()
+}
+
+func (m *Matrix) Data() []float64 {
+	return m.data
 }
 
 func Copy(m *Matrix) *Matrix {

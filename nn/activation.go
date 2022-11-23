@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-func lReLU(x float64) float64 {
+func LReLU(x float64) float64 {
 	if x >= 0 {
 		return x
 	} else {
@@ -12,7 +12,7 @@ func lReLU(x float64) float64 {
 	}
 }
 
-func dlReLU(x float64) float64 {
+func LReLUPrime(x float64) float64 {
 	if x >= 0 {
 		return 1
 	} else {

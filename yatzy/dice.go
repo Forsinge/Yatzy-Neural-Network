@@ -1,6 +1,7 @@
 package yatzy
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -45,6 +46,12 @@ func createDice(rolls []int, rerolls_left int) Dice {
 	dice.largest_group_index = largest_group_index
 	dice.Rerolls_left = 2
 	return dice
+}
+
+func (dice *Dice) Print() {
+	fmt.Println("Current dice:")
+	fmt.Println(dice.Faces)
+	fmt.Println()
 }
 
 func Reroll(dice Dice, indices []int) Dice {

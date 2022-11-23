@@ -3,102 +3,61 @@ package yatzy
 import (
 	"fmt"
 	"math/rand"
-
-	input "github.com/Forsinge/Yatzy-Neural-Network/input"
 )
 
-func RunGame() {
-	fmt.Println("Welcome to Yatzy!")
-
-	sheet := NewSheet()
-
-	for sheet.Categories_left > 0 {
-		fmt.Println()
-		fmt.Println("----- NEW ROUND -----")
-		fmt.Println()
-		fmt.Println("Current sheet:")
-		for i := range sheet.Categories {
-			category := sheet.Categories[i]
-			if category.Used && category.Points == 0 {
-				fmt.Print("[-] ")
-			} else if category.Points == 0 {
-				fmt.Print("[ ] ")
-			} else {
-				fmt.Print("[", category.Points, "] ")
-			}
-
-			fmt.Println(category.Name)
-		}
-		fmt.Println()
-
-		dice := Roll()
-		fmt.Println("You rolled:", dice.Faces)
-		fmt.Println("Now enter your rerolls. You have 2 rolls left.")
-
-		dice = Reroll(dice, input.ScanInts())
-		fmt.Println("You rolled:", dice.Faces)
-		fmt.Println("Now enter your rerolls. You have 1 rolls left.")
-
-		dice = Reroll(dice, input.ScanInts())
-		fmt.Println("You rolled:", dice.Faces)
-
-		options := ValidCategories(sheet, dice)
-		bust := len(options) == 0
-		if bust {
-			fmt.Println("No options. Select category to discard.")
-			options = ActiveCategories(sheet)
-		} else {
-			fmt.Println("Select a category.")
-		}
-
-		for i := range options {
-			category := sheet.Categories[options[i]]
-			fmt.Println(category.index, category.Name)
-		}
-
-		index := input.ScanInt()
-		sheet = ConsumeCategory(sheet, dice, index)
-	}
-
-	fmt.Println("Game complete! Total score:", GameScore(sheet))
+type Yatzy struct {
+	sheet Sheet
+	dice  Dice
 }
 
-func RunRandomizedGame() int {
-	sheet := NewSheet()
+func NewGame() Yatzy {
+	return Yatzy{
+		sheet: NewSheet(),
+		dice:  Roll(),
+	}
+}
 
-	for sheet.Categories_left > 0 {
-		dice := Roll()
-		dice = Reroll(dice, input.RandomRerolls())
-		dice = Reroll(dice, input.RandomRerolls())
+func (game *Yatzy) Print() {
+	fmt.Println("___________________________")
+	fmt.Println()
+	game.dice.Print()
+	game.sheet.Print()
+}
 
-		options := ValidCategories(sheet, dice)
-		bust := len(options) == 0
-
-		if bust {
-			options = ActiveCategories(sheet)
-		}
-
-		index := options[rand.Intn(len(options))] // because their indices are user adjusted
-
-		sheet = ConsumeCategory(sheet, dice, index)
+func NewRollState(game Yatzy) Yatzy {
+	if game.sheet.Categories_left <= 0 {
+		game.sheet = NewSheet()
+		game.dice = Roll()
 	}
 
-	/*
-		fmt.Println("Final sheet:")
-		for i := range sheet.categories {
-			category := sheet.categories[i]
-			if category.used && category.points == 0 {
-				fmt.Print("[-] ")
-			} else if category.points == 0 {
-				fmt.Print("[ ] ")
-			} else {
-				fmt.Print("[", category.points, "] ")
-			}
-
-			fmt.Println(category.Name)
+	if game.dice.Rerolls_left <= 0 {
+		cats := validCategories(game.sheet, game.dice)
+		if len(cats) == 0 {
+			cats = activeCategories(game.sheet)
 		}
-		fmt.Println()
-		fmt.Println("Total score:", GameScore(sheet))
-	*/
-	return GameScore(sheet)
+		i := cats[rand.Intn(len(cats)-1)]
+		game.sheet = ConsumeCategory(game.sheet, game.dice, i)
+	} else {
+		game.dice = Reroll(game.dice, []int{0, 1, 2, 3, 4})
+	}
+
+	return game
+}
+
+func NewSheetState(game Yatzy) Yatzy {
+	if game.sheet.Categories_left <= 0 {
+		game.sheet = NewSheet()
+		game.dice = Roll()
+	}
+
+	cats := validCategories(game.sheet, game.dice)
+	if len(cats) == 0 {
+		cats = activeCategories(game.sheet)
+	}
+	i := cats[rand.Intn(len(cats)-1)]
+	game.sheet = ConsumeCategory(game.sheet, game.dice, i)
+
+	game.dice = Roll()
+
+	return game
 }
